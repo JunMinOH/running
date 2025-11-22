@@ -1,0 +1,167 @@
+:root {
+  --color-brand--1: #ffb545;
+  --color-brand--2: #00c46a;
+
+  --color-dark--1: #2d3439;
+  --color-dark--2: #42484d;
+  --color-light--1: #aaa;
+  --color-light--2: #ececec;
+  --color-light--3: rgb(214, 222, 224);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit;
+}
+
+html {
+  font-size: 62.5%;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Manrope', sans-serif;
+  color: var(--color-light--2);
+  font-weight: 400;
+  line-height: 1.6;
+  height: 100vh;
+  overscroll-behavior-y: none;
+
+  background-color: #fff;
+  padding: 2.5rem;
+
+  display: flex;
+}
+
+/* SIDEBAR */
+.sidebar {
+  flex-basis: 50rem;
+  background-color: var(--color-dark--1);
+  padding: 3rem 5rem 4rem 5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  height: 20rem;
+  align-self: center;
+  margin-bottom: 5rem;
+}
+
+/* FORM */
+.form {
+  background-color: var(--color-dark--2);
+  border-radius: 5px;
+  padding: 2rem 3rem;
+  margin-bottom: 2rem;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 2rem;
+}
+
+.form__row {
+  display: flex;
+  align-items: center;
+  grid-column: 1 / -1;
+}
+
+.form__label {
+  flex: 0 0 35%;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.form__input {
+  width: 100%;
+  padding: 0.4rem 1.1rem;
+  font-family: inherit;
+  font-size: 1.4rem;
+  border: none;
+  border-radius: 3px;
+  background-color: var(--color-light--3);
+  transition: all 0.2s;
+}
+
+.form__input:focus {
+  outline: none;
+  background-color: #fff;
+}
+
+.form__hint {
+  grid-column: 1 / -1;
+  font-size: 1.2rem;
+  color: var(--color-light--1);
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+/* INFO BOX */
+.course-info {
+  grid-column: 1 / -1;
+  font-size: 1.3rem;
+  background-color: rgba(0, 0, 0, 0.25);
+  padding: 0.8rem 1rem;
+  border-radius: 4px;
+  line-height: 1.4;
+  margin-top: 0.5rem;
+}
+
+.course-info span {
+  font-weight: 700;
+}
+
+/* BUTTONS */
+.btn-alert-distance,
+.btn-undo,
+.btn-reset {
+  grid-column: 1 / -1;
+  margin-top: 0.6rem;
+  padding: 0.7rem 1.2rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.1s, transform 0.1s, box-shadow 0.1s;
+}
+
+.btn-alert-distance {
+  background-color: var(--color-brand--1);
+  color: var(--color-dark--1);
+}
+
+.btn-undo {
+  background-color: #222;
+  color: var(--color-light--2);
+  border: 1px solid var(--color-light--1);
+}
+
+.btn-reset {
+  background-color: #800000;
+  color: #fff;
+}
+
+.btn-alert-distance:hover,
+.btn-undo:hover,
+.btn-reset:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* 하단 저작권 */
+.copyright {
+  margin-top: auto;
+  font-size: 1.3rem;
+  text-align: center;
+  color: var(--color-light--1);
+}
+
+/* MAP */
+#map {
+  flex: 1;
+  height: 100%;
+  background-color: var(--color-light--1);
+}
