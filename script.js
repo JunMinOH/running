@@ -1,5 +1,6 @@
 'use strict';
 
+const API_BASE_URL = 'http://localhost:4000';
 const inputType = document.querySelector('.form__input--type');
 const inputCourseKm = document.querySelector('.form__input--course-km');
 const btnAlert = document.querySelector('.btn-alert-distance');
@@ -8,6 +9,8 @@ const btnReset = document.querySelector('.btn-reset');
 const btnSave = document.querySelector('.btn-save');
 const btnLoad = document.querySelector('.btn-load');
 const fileInput = document.querySelector('.gpx-input');
+const btnSaveServer = document.querySelector('.btn-save-server');
+const btnLoadServer = document.querySelector('.btn-load-server');
 
 const spanCurrent = document.querySelector('.course-current');
 const spanTarget = document.querySelector('.course-target');
@@ -36,6 +39,16 @@ class App {
     btnSave.addEventListener('click', this._downloadGpx.bind(this));
     btnLoad.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', this._onGpxFileSelected.bind(this));
+
+    // ✅ 서버 연동 버튼
+    btnSaveServer.addEventListener(
+      'click',
+      this._saveCourseToServer.bind(this)
+    );
+    btnLoadServer.addEventListener(
+      'click',
+      this._showCourseListFromServer.bind(this)
+    );
   }
 
   // ---------------- 지도 초기화 ----------------
@@ -389,6 +402,135 @@ class App {
       alert('GPX 파일을 읽는 중 오류가 발생했습니다.');
     }
   }
+    // ---------------- 서버 연동: 코스 저장 ----------------
+
+  async _saveCourseToServer() {
+    if (!this.#startLatLng || this.#pathCoords.length < 2) {
+      alert('먼저 코스를 그린 후 저장하세요.');
+      return;
+    }
+
+    const currentKm = this._getTotalDistanceKm().toFixed(2);
+    const defaultTitle = `코스 ${currentKm}km`;
+    const title = prompt('코스 제목을 입력하세요:', defaultTitle);
+    if (!title) return;
+
+    const now = new Date();
+    const timeStr = now.toISOString();
+
+    const header =
+      `<?xml version="1.0" encoding="UTF-8"?>\n` +
+      `<gpx version="1.1" creator="RunningCoursePlanner" ` +
+      `xmlns="http://www.topografix.com/GPX/1/1" ` +
+      `xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ` +
+      `xsi:schemaLocation="http://www.topografix.com/GPX/1/1 ` +
+      `http://www.topografix.com/GPX/1/1/gpx.xsd">\n`;
+
+    let trk =
+      `  <trk>\n` +
+      `    <name>${title}</name>\n` +
+      `    <time>${timeStr}</time>\n` +
+      `    <trkseg>\n`;
+
+    this.#pathCoords.forEach(p => {
+      trk += `      <trkpt lat="${p.lat}" lon="${p.lng}">\n`;
+      trk += `        <ele>0</ele>\n`;
+      trk += `        <time>${timeStr}</time>\n`;
+      trk += `      </trkpt>\n`;
+    });
+
+    trk += `    </trkseg>\n  </trk>\n</gpx>\n`;
+
+    const gpx = header + trk;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/courses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          type: inputType.value,
+          distanceKm: Number(currentKm),
+          gpx,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        console.error(data);
+        alert('서버에 저장하는 중 오류가 발생했습니다.');
+        return;
+      }
+
+      alert(`서버에 코스가 저장되었습니다. (id: ${data.id})`);
+    } catch (err) {
+      console.error(err);
+      alert('서버에 연결할 수 없습니다. 서버가 실행 중인지 확인하세요.');
+    }
+  }
+  // ---------------- 서버 연동: 코스 목록/불러오기 ----------------
+
+  async _showCourseListFromServer() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/courses`);
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        console.error(data);
+        alert('코스 목록을 불러오는 중 오류가 발생했습니다.');
+        return;
+      }
+
+      const courses = data.courses;
+      if (!courses || courses.length === 0) {
+        alert('저장된 코스가 없습니다.');
+        return;
+      }
+
+      let msg = '불러올 코스 id를 입력하세요.\n\n';
+      courses.forEach(c => {
+        msg += `${c.id}: [${c.type}] ${c.title} (${c.distance_km} km)\n`;
+      });
+
+      const input = prompt(msg);
+      if (!input) return;
+      const courseId = Number(input);
+      if (!courseId) {
+        alert('잘못된 번호입니다.');
+        return;
+      }
+
+      this._loadCourseFromServer(courseId);
+    } catch (err) {
+      console.error(err);
+      alert('서버에 연결할 수 없습니다.');
+    }
+  }
+
+  async _loadCourseFromServer(courseId) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/courses/${courseId}`);
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        console.error(data);
+        alert('코스를 불러오는 중 오류가 발생했습니다.');
+        return;
+      }
+
+      const gpxText = data.course.gpx_xml;
+      if (!gpxText) {
+        alert('이 코스에는 GPX 데이터가 없습니다.');
+        return;
+      }
+
+      this._loadGpxFromText(gpxText);
+    } catch (err) {
+      console.error(err);
+      alert('서버에 연결할 수 없습니다.');
+    }
+  }
+
 }
 
 let app;

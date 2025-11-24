@@ -116,7 +116,11 @@ body {
 /* BUTTONS */
 .btn-alert-distance,
 .btn-undo,
-.btn-reset {
+.btn-reset,
+.btn-save,
+.btn-load,
+.btn-save-server,
+.btn-load-server {
   grid-column: 1 / -1;
   margin-top: 0.6rem;
   padding: 0.7rem 1.2rem;
@@ -127,6 +131,7 @@ body {
   cursor: pointer;
   transition: background-color 0.1s, transform 0.1s, box-shadow 0.1s;
 }
+
 
 .btn-alert-distance {
   background-color: var(--color-brand--1);
